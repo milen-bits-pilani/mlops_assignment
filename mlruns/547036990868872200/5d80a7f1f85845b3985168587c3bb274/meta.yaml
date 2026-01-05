@@ -1,0 +1,15 @@
+artifact_uri: file:///home/milen/python-312/mlops_project/mlruns/547036990868872200/5d80a7f1f85845b3985168587c3bb274/artifacts
+end_time: 1767540282323
+entry_point_name: ''
+experiment_id: '547036990868872200'
+lifecycle_stage: active
+run_id: 5d80a7f1f85845b3985168587c3bb274
+run_name: RandomForest
+run_uuid: 5d80a7f1f85845b3985168587c3bb274
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767540279814
+status: 3
+tags: []
+user_id: milen

@@ -1,0 +1,6 @@
+artifact_location: file:///home/milen/python-312/mlops_project/mlruns/547036990868872200
+creation_time: 1767540249362
+experiment_id: '547036990868872200'
+last_update_time: 1767540249362
+lifecycle_stage: active
+name: heart_disease

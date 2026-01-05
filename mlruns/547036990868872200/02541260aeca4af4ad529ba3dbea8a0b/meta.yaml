@@ -1,0 +1,15 @@
+artifact_uri: file:///home/milen/python-312/mlops_project/mlruns/547036990868872200/02541260aeca4af4ad529ba3dbea8a0b/artifacts
+end_time: 1767540615469
+entry_point_name: ''
+experiment_id: '547036990868872200'
+lifecycle_stage: active
+run_id: 02541260aeca4af4ad529ba3dbea8a0b
+run_name: LogisticRegression
+run_uuid: 02541260aeca4af4ad529ba3dbea8a0b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767540612375
+status: 3
+tags: []
+user_id: milen
