@@ -25,8 +25,8 @@ mlops_project/
 ### 1. Create Virtual Environment
 
 ```bash
-python3.12 -m venv /home/milen/python-312/venv
-source /home/milen/python-312/venv/bin/activate
+python3.12 -m venv venv
+source venv/bin/activate
 ```
 
 ### 2. Install Dependencies
