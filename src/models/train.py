@@ -96,8 +96,22 @@ def train_models(
     actual_uri = mlflow.get_tracking_uri()
     print(f"Actual MLflow tracking URI: {actual_uri}")
 
+    # Ensure mlruns directory structure exists before setting experiment
+    # MLflow creates mlruns/0/meta.yaml for default experiment, so ensure parent exists
+    Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
+
     # Set MLflow experiment
-    mlflow.set_experiment(mlflow_experiment)
+    # This will create the experiment directory (e.g., mlruns/0/) and meta.yaml
+    try:
+        mlflow.set_experiment(mlflow_experiment)
+        print(f"Experiment '{mlflow_experiment}' set successfully")
+    except Exception as e:
+        # If experiment creation fails, try to diagnose the issue
+        print(f"Warning: Error setting experiment: {e}")
+        print(f"MLruns directory: {mlruns_dir}")
+        print(f"MLruns exists: {os.path.exists(mlruns_dir)}")
+        print(f"MLruns writable: {os.access(mlruns_dir, os.W_OK)}")
+        raise
 
     # Load and clean data
     print("Loading and cleaning data...")
