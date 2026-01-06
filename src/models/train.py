@@ -40,7 +40,7 @@ def train_models(
     Args:
         data_path: Path to the dataset
         output_dir: Directory to save models
-        mlflow_experiment: MLflow experiment name
+        mlflow_experiment: MLflow experiment niame
     """
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
