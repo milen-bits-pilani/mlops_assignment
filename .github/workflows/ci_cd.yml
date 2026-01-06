@@ -27,7 +27,6 @@ jobs:
         run: |
           black --check src/ tests/
       
-      
       - name: Run Pylint
         run: |
           pylint src/ tests/ --max-line-length=120 || true
