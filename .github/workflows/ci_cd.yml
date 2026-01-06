@@ -96,7 +96,7 @@ jobs:
           rm -rf mlruns
           # Create fresh mlruns directory
           mkdir -p mlruns
-          python src/models/train. py data/raw/heart_disease.csv
+          python src/models/train.py data/raw/heart_disease.csv
       
       - name: Upload model artifacts
         uses:  actions/upload-artifact@v4
