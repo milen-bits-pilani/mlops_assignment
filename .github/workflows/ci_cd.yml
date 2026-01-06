@@ -87,8 +87,11 @@ jobs:
         env:
           # Set HOME to workspace to avoid path resolution issues with MLflow
           HOME: ${{ github.workspace }}
+          # Set MLflow tracking URI to workspace/mlruns (absolute path)
           MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
         run: |
+          # Ensure mlruns directory exists before training
+          mkdir -p mlruns
           python src/models/train.py data/raw/heart_disease.csv
       
       - name: Upload model artifacts

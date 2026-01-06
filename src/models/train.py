@@ -46,34 +46,51 @@ def train_models(
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set MLflow tracking URI to local directory
-    # Check if MLFLOW_TRACKING_URI is set as environment variable (e.g., in CI/CD)
+    # Always use current working directory to ensure writable location
+    # This works in both local and CI/CD environments
+    cwd = os.getcwd()
+    mlruns_dir = os.path.join(cwd, "mlruns")
+
+    # Ensure directory exists and is writable BEFORE setting tracking URI
+    # This prevents MLflow from trying to create parent directories
+    try:
+        Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
+        # Test write permissions
+        test_file = os.path.join(mlruns_dir, ".test_write")
+        with open(test_file, "w") as f:
+            f.write("test")
+        os.remove(test_file)
+        print(f"MLruns directory verified: {mlruns_dir}")
+    except (OSError, PermissionError) as e:
+        raise RuntimeError(
+            f"Cannot create or write to mlruns directory at {mlruns_dir}: {e}"
+        )
+
+    # Use absolute path for MLflow tracking URI
+    # Check environment variable first (for CI/CD), but ensure path is in workspace
     if "MLFLOW_TRACKING_URI" in os.environ:
-        tracking_uri = os.environ["MLFLOW_TRACKING_URI"]
-        mlflow.set_tracking_uri(tracking_uri)
-        print(f"Using MLFLOW_TRACKING_URI from environment: {tracking_uri}")
+        env_uri = os.environ["MLFLOW_TRACKING_URI"]
+        # Extract path from URI
+        if env_uri.startswith("file://"):
+            env_path = env_uri[7:]
+        else:
+            env_path = env_uri
+        # Use environment URI if it's within workspace, otherwise use workspace mlruns
+        if os.path.commonpath([cwd, os.path.abspath(env_path)]) == cwd:
+            tracking_uri = env_uri
+            mlruns_dir = os.path.abspath(env_path)
+        else:
+            # Fall back to workspace mlruns
+            mlflow_tracking_uri = os.path.abspath(os.path.normpath(mlruns_dir))
+            tracking_uri = f"file://{mlflow_tracking_uri}"
     else:
-        # In local environments, use current working directory
-        cwd = os.getcwd()
-        mlruns_dir = os.path.join(cwd, "mlruns")
-
-        # Ensure directory exists and is writable
-        try:
-            Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
-            # Test write permissions
-            test_file = os.path.join(mlruns_dir, ".test_write")
-            with open(test_file, "w") as f:
-                f.write("test")
-            os.remove(test_file)
-        except (OSError, PermissionError) as e:
-            raise RuntimeError(
-                f"Cannot create or write to mlruns directory at {mlruns_dir}: {e}"
-            )
-
-        # Use absolute path for MLflow tracking URI
+        # Use workspace mlruns directory
         mlflow_tracking_uri = os.path.abspath(os.path.normpath(mlruns_dir))
         tracking_uri = f"file://{mlflow_tracking_uri}"
-        mlflow.set_tracking_uri(tracking_uri)
-        print(f"MLflow tracking URI set to: {tracking_uri}")
+
+    # Set tracking URI AFTER ensuring directory exists
+    mlflow.set_tracking_uri(tracking_uri)
+    print(f"MLflow tracking URI set to: {tracking_uri}")
 
     # Verify tracking URI is set correctly
     actual_uri = mlflow.get_tracking_uri()
