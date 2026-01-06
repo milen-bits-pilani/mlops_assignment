@@ -1,6 +1,7 @@
 """
 Unit tests for API endpoints
 """
+
 import pytest
 from fastapi.testclient import TestClient
 import sys
@@ -50,9 +51,9 @@ def test_predict_endpoint_structure():
         "oldpeak": 2.3,
         "slope": 0,
         "ca": 0,
-        "thal": 1
+        "thal": 1,
     }
-    
+
     response = client.post("/predict", json=sample_input)
     # May fail if model not loaded, but should validate input structure
     assert response.status_code in [200, 500, 503]
@@ -73,9 +74,9 @@ def test_predict_endpoint_validation():
         "oldpeak": 2.3,
         "slope": 0,
         "ca": 0,
-        "thal": 1
+        "thal": 1,
     }
-    
+
     response = client.post("/predict", json=invalid_input)
     # Should return validation error
     assert response.status_code == 422
@@ -86,4 +87,3 @@ def test_metrics_endpoint():
     response = client.get("/metrics")
     assert response.status_code == 200
     assert "text/plain" in response.headers.get("content-type", "")
-
