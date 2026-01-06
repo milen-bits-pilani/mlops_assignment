@@ -96,15 +96,34 @@ def train_models(
     actual_uri = mlflow.get_tracking_uri()
     print(f"Actual MLflow tracking URI: {actual_uri}")
 
-    # Ensure mlruns directory structure exists before setting experiment
-    # MLflow creates mlruns/0/meta.yaml for default experiment, so ensure parent exists
-    Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
+    # In CI/CD environments, clear existing mlruns to avoid hardcoded paths
+    # This prevents issues with artifact_location in meta.yaml containing old paths
+    if "MLFLOW_TRACKING_URI" in os.environ or os.environ.get("CI") == "true":
+        # Clear existing mlruns if it exists (to remove hardcoded paths)
+        if os.path.exists(mlruns_dir):
+            import shutil
+
+            print(f"Clearing existing mlruns directory to avoid hardcoded paths...")
+            shutil.rmtree(mlruns_dir, ignore_errors=True)
+        # Recreate fresh mlruns directory
+        Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
+        print(f"Created fresh mlruns directory: {mlruns_dir}")
+    else:
+        # In local environments, just ensure directory exists
+        Path(mlruns_dir).mkdir(parents=True, exist_ok=True)
 
     # Set MLflow experiment
     # This will create the experiment directory (e.g., mlruns/0/) and meta.yaml
+    # with correct artifact_location based on current tracking URI
     try:
         mlflow.set_experiment(mlflow_experiment)
         print(f"Experiment '{mlflow_experiment}' set successfully")
+
+        # Verify artifact location is correct
+        client = mlflow.tracking.MlflowClient()
+        experiment = client.get_experiment_by_name(mlflow_experiment)
+        if experiment:
+            print(f"Experiment artifact_location: {experiment.artifact_location}")
     except Exception as e:
         # If experiment creation fails, try to diagnose the issue
         print(f"Warning: Error setting experiment: {e}")

@@ -89,8 +89,12 @@ jobs:
           HOME: ${{ github.workspace }}
           # Set MLflow tracking URI to workspace/mlruns (absolute path)
           MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
+          # Mark as CI environment
+          CI: "true"
         run: |
-          # Ensure mlruns directory exists before training
+          # Remove existing mlruns if present (to avoid hardcoded paths in meta.yaml)
+          rm -rf mlruns
+          # Create fresh mlruns directory
           mkdir -p mlruns
           python src/models/train.py data/raw/heart_disease.csv
       
