@@ -27,6 +27,9 @@ jobs:
         run: |
           black --check src/ tests/
       
+      - name: Run Flake8
+        run: |
+          flake8 src/ tests/ --max-line-length=120 --extend-ignore=E203,W503
       
       - name: Run Pylint
         run: |
@@ -84,6 +87,10 @@ jobs:
           python -c "from src.eda.explore import perform_eda; perform_eda('data/raw/heart_disease.csv')"
       
       - name: Train models
+        env:
+          # Set HOME to workspace to avoid path resolution issues with MLflow
+          HOME: ${{ github.workspace }}
+          MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
         run: |
           python src/models/train.py data/raw/heart_disease.csv
       
