@@ -1,9 +1,7 @@
 """
 Unit tests for API endpoints
 """
-
 import pytest
-from fastapi.testclient import TestClient
 import sys
 import os
 
@@ -16,12 +14,17 @@ if project_root not in sys.path:
 os.environ["MODEL_PATH"] = "models/best_model.pkl"
 os.environ["PREPROCESSOR_PATH"] = "models/preprocessor.pkl"
 
+from fastapi.testclient import TestClient
 from src.api.app import app
 
-client = TestClient(app)
+
+@pytest.fixture
+def client():
+    """Create test client"""
+    return TestClient(app)
 
 
-def test_root_endpoint():
+def test_root_endpoint(client):
     """Test root endpoint"""
     response = client.get("/")
     assert response.status_code == 200
@@ -29,14 +32,14 @@ def test_root_endpoint():
     assert "endpoints" in response.json()
 
 
-def test_health_endpoint():
+def test_health_endpoint(client):
     """Test health check endpoint"""
     response = client.get("/health")
     # May return 503 if model not loaded, which is expected in test environment
     assert response.status_code in [200, 503]
 
 
-def test_predict_endpoint_structure():
+def test_predict_endpoint_structure(client):
     """Test predict endpoint accepts correct input structure"""
     sample_input = {
         "age": 63,
@@ -51,15 +54,15 @@ def test_predict_endpoint_structure():
         "oldpeak": 2.3,
         "slope": 0,
         "ca": 0,
-        "thal": 1,
+        "thal": 1
     }
-
+    
     response = client.post("/predict", json=sample_input)
     # May fail if model not loaded, but should validate input structure
     assert response.status_code in [200, 500, 503]
 
 
-def test_predict_endpoint_validation():
+def test_predict_endpoint_validation(client):
     """Test input validation"""
     invalid_input = {
         "age": -10,  # Invalid: negative age
@@ -74,16 +77,17 @@ def test_predict_endpoint_validation():
         "oldpeak": 2.3,
         "slope": 0,
         "ca": 0,
-        "thal": 1,
+        "thal": 1
     }
-
+    
     response = client.post("/predict", json=invalid_input)
     # Should return validation error
     assert response.status_code == 422
 
 
-def test_metrics_endpoint():
+def test_metrics_endpoint(client):
     """Test Prometheus metrics endpoint"""
     response = client.get("/metrics")
     assert response.status_code == 200
     assert "text/plain" in response.headers.get("content-type", "")
+
